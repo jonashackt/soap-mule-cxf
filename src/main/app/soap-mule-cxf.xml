@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/current/mule-jersey.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8085" doc:name="HTTP Listener Configuration" basePath="/soap-api"/>
+    <cxf:configuration name="CXF_Configuration" enableMuleSoapHeaders="true" initializeStaticBusInstance="true" doc:name="CXF Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" host="localhost" port="8080" basePath="/weatherbackend" doc:name="HTTP Request Configuration"/>
+    <flow name="soap-mule-cxfFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/WeatherSoapService_1.0" allowedMethods="GET,POST" doc:name="HTTP"/>
+        <cxf:jaxws-service serviceClass="de.codecentric.namespace.weatherservice.WeatherService" validationEnabled="true" doc:name="CXF" configuration-ref="CXF_Configuration"/>
+        <logger level="INFO" doc:name="Logger" message="100: Transformation of incoming JAXB-Bind Objects to internal Model"/>
+        <custom-transformer returnClass="de.codecentric.soap.internalmodel.Weather" class="de.codecentric.soap.transformation.GetCityForecastByZIPInMapper" doc:name="GetCityForecastByZIPInMapper"/>
+        <logger message="101: Call Backend with internal Model" level="INFO" doc:name="Logger"/>
+        <json:object-to-json-transformer   doc:name="Weather-Object to JSON"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/general/outlook" method="POST" doc:name="WeatherBackend"/>
+        <json:json-to-object-transformer returnClass="de.codecentric.soap.internalmodel.GeneralOutlook" doc:name="GeneralOutlook-JSON to Object"/>
+        <logger message="102: Transformation internal Model to outgoing JAXB-Bind Objects" level="INFO" doc:name="Logger"/>
+        <custom-transformer returnClass="de.codecentric.namespace.weatherservice.general.ForecastReturn" class="de.codecentric.soap.transformation.GetCityForecastByZIPOutMapper" doc:name="GetCityForecastByZIPOutMapper"/>
+    </flow>
+</mule>
