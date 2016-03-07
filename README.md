@@ -9,5 +9,7 @@ Fully running example of [https://github.com/jonashackt/soap-spring-boot-cxf](ht
 
 Works only, if you boot the Weather-Backend, which exposes a REST-Service that the Mule-Flow needs to run: [https://github.com/jonashackt/weatherbackend](https://github.com/jonashackt/weatherbackend). Just clone and mvn spring-boot:run :)
 
+**the current Maven-setup only works, if you have an Mule enterprise (ee) repository configured in your settings.xml**
+
 [MuleESB]:https://www.mulesoft.com/resources/esb/what-mule-esb
 [Spring Boot]:http://projects.spring.io/spring-boot/
